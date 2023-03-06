@@ -3,7 +3,7 @@ import jwt from "../utils/jwt"
 
 const userAuth=(req:Request,res:Response,next:NextFunction)=>{
     if(!req.headers.authorization||typeof req.headers.authorization!=="string"){
-        next(new Error("Invalid Auth header"))
+        return next(new Error("Invalid Auth header"))
     }
     let token=req.headers.authorization!.split(" ")[1]
     jwt.checkToken(token)
@@ -12,6 +12,9 @@ const userAuth=(req:Request,res:Response,next:NextFunction)=>{
             if(data.orgId){
                 res.locals.orgLogin=true;
                 res.locals.orgId=data.orgId;
+            }
+            else{
+                res.locals.orgLogin=false;
             }
             next()
         })

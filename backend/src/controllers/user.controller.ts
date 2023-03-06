@@ -1,12 +1,15 @@
 import { Request, Response } from "express";
+import userService from "../services/user.service";
 
-const detail = (req: Request, res: Response) => {
-    console.log("auth passed")
+const detail = async (req: Request, res: Response) => {
+    // console.log("auth passed")
+    let data=await userService.userDetail(res.locals.userId)
     res.status(200).send({
         success: true,
-        message: "Pong",
+        message: "User details!",
         data:{
-            id:res.locals.userId
+            userDetail:data,
+            orgLogin:res.locals.orgLogin
         }
     });
 };
