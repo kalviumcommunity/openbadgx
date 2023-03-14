@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import userService from "../services/user.service";
+import assertionService from "../services/assertion.service";
 
 const detail = async (req: Request, res: Response) => {
     // console.log("auth passed")
@@ -14,6 +15,17 @@ const detail = async (req: Request, res: Response) => {
     });
 };
 
+const listBadge=async (req:Request,res:Response)=>{
+    let {userId}=res.locals
+    let badgeList=await assertionService.assertionList(userId)
+    res.status(200).send({
+        success:true,
+        message:"Badges Fetched",
+        data:badgeList
+    })
+}
+
 export default {
-    detail
+    detail,
+    listBadge
 };
