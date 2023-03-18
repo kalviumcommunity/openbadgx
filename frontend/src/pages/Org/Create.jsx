@@ -2,41 +2,40 @@ import { useState,useContext } from 'react'
 import fetchBackend from '../../utils/fetchBackend';
 import { LoginContext } from '../../App';
 import { useNavigate } from 'react-router-dom';
+import BannerAlert from '../../components/BannerAlert';
 
 const OrgCreate = () => {
   const { loginStatus, updateLoginStatus } = useContext(LoginContext);
   const navigate=useNavigate()
   const [orgName,updateOrgName]=useState("");
   const [orgKey,updateOrgKey]=useState("");
-  const [apiResponse,updateApiResponse]=useState({
-    status:null,
-    message:null
-  })
+  const [alertData, updateAlertData] = useState(null);
   const createOrg=async (e)=>{
     e.preventDefault();
-    updateApiResponse({
-      status:"load",
-      message:"Loading..."
-    })
+    updateAlertData({
+      type: "info",
+      message: "Loading...",
+    });
     let orgStatus=await fetchBackend("user/org/add","POST",loginStatus.token,{
       key:orgKey,
       name:orgName
     })
     .then(res=>res.data)
-    .catch(err=>updateApiResponse({
-      status:"error",
+    .catch(err=>updateAlertData({
+      type:"error",
       message:err.message
     }))
     if(orgStatus){
-      updateApiResponse({
-        status:"success",
+      updateAlertData({
+        type:"success",
         message:"Org created successfully🤩 Redirecting..."
       })
-      updateLoginStatus(prev=>({
+      updateLoginStatus((prev) => ({
         ...prev,
-        orgLogin:true,
-        token:orgStatus.accessToken
-      }))
+        orgLogin: true,
+        token: orgStatus.accessToken,
+        orgDetail: null,
+      }));
       setTimeout(()=>navigate("/org/home"),1000);
     }
     
@@ -58,11 +57,10 @@ const OrgCreate = () => {
           placeholder="Key"
         />
 
-        <button type='submit'>Create Org</button>
+        <button type="submit">Create Org</button>
       </form>
-      {apiResponse.status&&( <div>
-        {apiResponse.message}
-      </div> )}
+
+      <BannerAlert status={alertData} />
     </div>
   );
 }

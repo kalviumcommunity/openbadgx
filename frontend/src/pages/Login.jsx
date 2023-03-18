@@ -1,40 +1,51 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useContext, useEffect, useState } from "react";
-import "./Login.css";
 import { LoginContext } from "../App";
 import fetchBackend from "../utils/fetchBackend";
 import { setLocalToken } from "../utils/localToken";
+import { Box, Button, Typography } from "@mui/material";
+import BannerAlert from "../components/BannerAlert";
 
 const Login = () => {
   const { loginStatus, updateLoginStatus } = useContext(LoginContext);
   const [gAuth, updateGAuth] = useState(null);
+  const [alertData,updateAlertData]=useState(null)
+  const navigate=useNavigate()
 
   useEffect(() => {
     if (gAuth) {
       (async () => {
+        updateAlertData({
+          type: "info",
+          message: "Loading...",
+        });
         let gAuthToken = gAuth.credential;
         let token = await fetchBackend("auth/google", "POST", null, {
           gAuthToken,
         })
           .then((data) => data.data.accessToken)
           .catch((err) => console.log("Error: ", err));
-        // console.log(token);
         if (!token) return;
         updateLoginStatus((prev) => ({
           ...prev,
           loggedIn: true,
-          localStorageCheck:true,
+          localStorageCheck: true,
           token: token,
           userDetail: null,
           orgDetail: null,
         }));
-        setLocalToken(token)
+        setLocalToken(token);
+        updateAlertData({
+          type: "success",
+          message: "Successfully Logged in! Redirecting...",
+        });
+        setTimeout(() => navigate("/me"), 1000);
       })();
     }
   }, [gAuth]);
 
-  const logOut=()=>{
+  const logOut = () => {
     updateLoginStatus((prev) => ({
       ...prev,
       loggedIn: false,
@@ -42,31 +53,45 @@ const Login = () => {
       userDetail: null,
       orgDetail: null,
     }));
-    setLocalToken(null)
-  }
+    setLocalToken(null);
+    updateAlertData({
+      type: "info",
+      message: "Logged Out!",
+    });
+  };
 
-  // console.log(loginStatus.token);
   return (
-    <div>
+    <Box sx={{
+      display:"flex",
+      flexDirection:"column",
+      alignItems:"center",
+    }}>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <h2>Login Happens here</h2>
-        <div className="detail">
-          <Link to="/">Go Home 🏠</Link>
-        </div>
-        <div className="login-action">
-          {loginStatus.loggedIn ? (
-            <button onClick={logOut}>Log Out</button>
-          ) : (
+        {loginStatus.loggedIn ? (
+          <>
+            <Typography variant="h6">You are logged in!</Typography>
+            <Button onClick={logOut} variant="outlined" color="error" sx={{mt:5}}>
+              Log Out
+            </Button>
+          </>
+        ) : (
+          <>
+            <Typography variant="h6" sx={{mb:5}}>Login with Google to continue!</Typography>
             <GoogleLogin
               onSuccess={updateGAuth}
-              onError={() => {
-                console.log("Login Failed");
+              onError={(err) => {
+                console.log("Login Failed",err);
+                updateAlertData({
+                  type:"error",
+                  message:"Google Auth Failed"
+                })
               }}
             />
-          )}
-        </div>
+          </>
+        )}
       </GoogleOAuthProvider>
-    </div>
+      <BannerAlert status={alertData}/>
+    </Box>
   );
 };
 

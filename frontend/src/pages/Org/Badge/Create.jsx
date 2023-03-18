@@ -1,65 +1,84 @@
-import {useContext, useState} from 'react'
-import { Link } from 'react-router-dom';
-import { LoginContext } from '../../../App';
-import fetchBackend from '../../../utils/fetchBackend';
+import { Button, FormControl, TextField } from "@mui/material";
+import { Box } from "@mui/system";
+import { useContext, useState } from "react";
+import { Link } from "react-router-dom";
+import { LoginContext } from "../../../App";
+import BannerAlert from "../../../components/BannerAlert";
+import fetchBackend from "../../../utils/fetchBackend";
 
 const OrgBadgeCreate = () => {
   const { loginStatus, updateLoginStatus } = useContext(LoginContext);
   const [badgeTitle, updateBadgeTitle] = useState("");
   const [badgeDesc, updateBadgeDesc] = useState("");
-  const [apiResponse, updateApiResponse] = useState({
-    status: null,
-    message: null,
-  });
+  const [alertData, updateAlertData] = useState(null);
   const createBadge = async (e) => {
     e.preventDefault();
-    updateApiResponse({
-      status: "load",
+    updateAlertData({
+      type: "info",
       message: "Loading...",
     });
-    let badgeStatus = await fetchBackend("org/badge/add", "POST", loginStatus.token, {
-      title:badgeTitle,
-      desc:badgeDesc
-    })
+    let badgeStatus = await fetchBackend(
+      "org/badge/add",
+      "POST",
+      loginStatus.token,
+      {
+        title: badgeTitle,
+        desc: badgeDesc,
+      }
+    )
       .then((res) => res.data)
       .catch((err) =>
-        updateApiResponse({
-          status: "error",
+        updateAlertData({
+          type: "error",
           message: err.message,
         })
       );
     if (badgeStatus) {
-      updateApiResponse({
-        status: "success",
+      updateAlertData({
+        type: "success",
         message: "Badge created successfully🤩",
-      })
+      });
     }
   };
   return (
     <div>
       <h3>Create Badge</h3>
-      <form onSubmit={createBadge}>
-        <input
-          type="text"
-          value={badgeTitle}
-          onChange={(e) => updateBadgeTitle(e.target.value)}
-          placeholder="Title"
-        />
-        <input
-          type="text"
-          value={badgeDesc}
-          onChange={(e) => updateBadgeDesc(e.target.value)}
-          placeholder="Description"
-        />
+      <Box
+        component="form"
+        onSubmit={createBadge}
+        sx={{
+          maxWidth: 700,
+        }}
+      >
+        <FormControl fullWidth={true} margin="normal">
+          <TextField
+            variant="outlined"
+            value={badgeTitle}
+            onChange={(e) => updateBadgeTitle(e.target.value)}
+            label="Title"
+          />
+        </FormControl>
+        <FormControl fullWidth={true} margin="normal">
+          <TextField
+            variant="outlined"
+            value={badgeDesc}
+            onChange={(e) => updateBadgeDesc(e.target.value)}
+            label="Description"
+            multiline={true}
+          />
+        </FormControl>
+        <Button type="submit" sx={{ mt: 3 }} variant="contained">
+          Create
+        </Button>
 
-        <button type='submit'>Create Badge</button>
-      </form>
-      {apiResponse.status&&( <div>
-        {apiResponse.message}
-      </div> )}
-      <Link to="/org/badge">View all badges</Link>
+        <BannerAlert status={alertData} />
+      </Box>
+
+      <Button sx={{ mt: 2 }} variant="outlined" component={Link} to="../">
+        View all badges
+      </Button>
     </div>
-  )
-}
+  );
+};
 
-export default OrgBadgeCreate
+export default OrgBadgeCreate;
