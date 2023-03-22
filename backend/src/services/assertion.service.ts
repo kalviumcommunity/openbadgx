@@ -21,14 +21,16 @@ const assertionDetail=(assertionId:string)=>
     Badge.findOne({
         assertions:{
             $elemMatch: {
-                id:assertionId
+                _id:assertionId
             }
         }
     },{
         title:1,
         desc:1,
+        template:1,
         "assertions.$":1
     })
+    .populate("org","key name")
 
 
 export default{
