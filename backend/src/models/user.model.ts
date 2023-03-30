@@ -10,10 +10,8 @@ const userSchema=new Schema({
         ]
     },
     name:{
-        type:String
-    },
-    password:{
         type:String,
+        required:true
     },
     isActive:{
         type:Boolean
@@ -24,7 +22,6 @@ const userSchema=new Schema({
     loginMethod:[
         {
             type:String,
-            enum:["google"]
         }
     ]
 },{
