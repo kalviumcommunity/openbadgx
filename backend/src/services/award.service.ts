@@ -1,8 +1,11 @@
 import { Types } from "mongoose";
 import Badge from "../models/badge.model";
 import MailQueue from "../models/mailQueue.model";
+import { APIError } from "../utils/error";
 import { triggerNextMail } from "../utils/ses";
 import userService from "./user.service"
+
+const maxAwardPerBadge=Number(process.env.MAX_AWARD_PER_BADGE)||0
 
 type ResArray=string[]
 interface UserDetail{
@@ -36,8 +39,10 @@ const batchAward = (badgeId: string,orgId:string, users: [UserDetail]) =>
             org:orgId
         })
         .populate<{org:OrgData}>("org")
-        if(!badge) reject(new Error("Invalid badge"))
+        .catch(err=>reject(err))
+        if(!badge) return reject(new Error("Invalid badge"))
         let awardeeList = badge?.assertions||[]
+        if((awardeeList.length+users.length)>maxAwardPerBadge) return reject(new APIError(`Total awardees for the certificate exceeds the limit of ${maxAwardPerBadge}.`,400))
         let mailQueueData:MailQueueObject[]=[]
         for await(let userDetail of users){
             await userService.findUser(userDetail.email,userDetail.name)
@@ -74,9 +79,9 @@ const batchAward = (badgeId: string,orgId:string, users: [UserDetail]) =>
                 error.push(userDetail.email)
             })
         }
-        await badge?.updateOne({assertions:awardeeList})
-        .catch(err=>reject(new Error("Error in adding assertion")))
-        await MailQueue.insertMany(mailQueueData)
+        let assertionStatus=await badge?.updateOne({assertions:awardeeList})
+        .catch(err=>reject(err))
+        assertionStatus&&await MailQueue.insertMany(mailQueueData)
         .then(()=>triggerNextMail())
         .catch((err) =>
             reject(new Error("Error in queueing mails"))
