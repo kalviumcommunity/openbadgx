@@ -1,0 +1,3 @@
+[submodule "OpenBadgX"]
+	path = OpenBadgX
+	url = https://github.com/nikiljos/OpenBadgX.git
