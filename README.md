@@ -1,5 +1,11 @@
 # OpenBadgX
 
+> **🚧🚧 Notice 🚧🚧**
+>
+> The active development of this project have been moved to [`nikiljos/OpenBadgX`](https://github.com/nikiljos/OpenBadgX)
+> 
+> View the [`archive`](https://github.com/kalviumcommunity/openbadgx/tree/archive) branch to see the progress made as part of the Kalvium Capstone Project.  
+
 ### Project URLs
 👉 [Frontend](https://openbadgx.netlify.app)  
 
@@ -59,4 +65,3 @@
 |Passwordless Email Auth|✔️|[PR #17](https://github.com/kalviumcommunity/openbadgx/pull/17)|17th April|
 |API Rate Limiting|✔️|[PR #21](https://github.com/kalviumcommunity/openbadgx/pull/21)|17th April|
 |Redis|✔️|[PR #21](https://github.com/kalviumcommunity/openbadgx/pull/21)|17th April|
-|...||[-](#)|

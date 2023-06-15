@@ -1,0 +1,20 @@
+name: Update Submodule
+on:
+  workflow_dispatch:
+jobs:
+  version-bump:
+    name: Update Submodule
+    runs-on: ubuntu-latest
+    steps:
+       - name: Checkout Source
+         uses: actions/checkout@v2
+       - name: Pull the latest changes
+         run: |
+            git config user.name nikiljos-bot
+            git config user.email bot@nikjos.in
+            git submodule update --remote --init || true
+       - name: Commit changes
+         run: |
+            git add --all || true
+            git commit -m "Updated Submodule" || true
+            git push --quiet
